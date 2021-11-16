@@ -731,7 +731,7 @@ The parameters are set in the file parameters.properties, in the kettle root fol
         <type>None</type>
         <length>-2</length>
         <precision>-2</precision>
-        <conversion_mask>dd/MM/yyyy</conversion_mask>
+        <conversion_mask>yyyy-MM-dd</conversion_mask>
         <date_format_lenient>false</date_format_lenient>
         <date_format_locale/>
         <date_format_timezone/>
@@ -836,7 +836,7 @@ The parameters are set in the file parameters.properties, in the kettle root fol
       <field>
         <field_name>SYSTIMESTAMP</field_name>
         <variable_name>SYSTIMESTAMP</variable_name>
-        <variable_type>ROOT_JOB</variable_type>
+        <variable_type>JVM</variable_type>
         <default_value/>
       </field>
     </fields>
