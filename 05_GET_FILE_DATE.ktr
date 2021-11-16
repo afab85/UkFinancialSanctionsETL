@@ -502,17 +502,7 @@
   <order>
     <hop>
       <from>Text file input</from>
-      <to>Select values</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Select values</from>
-      <to>Execute SQL script</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Execute SQL script</from>
-      <to>Table input</to>
+      <to>Select values 1</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
@@ -535,9 +525,29 @@
       <to>Set variables 2</to>
       <enabled>Y</enabled>
     </hop>
+    <hop>
+      <from>Select values 1</from>
+      <to>Set variables 3</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Set variables 3</from>
+      <to>Execute SQL script 1</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Execute SQL script 1</from>
+      <to>Get variables</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Get variables</from>
+      <to>Table input</to>
+      <enabled>Y</enabled>
+    </hop>
   </order>
   <step>
-    <name>Execute SQL script</name>
+    <name>Execute SQL script 1</name>
     <type>ExecSQL</type>
     <description/>
     <distribute>Y</distribute>
@@ -552,7 +562,7 @@
     <single_statement>N</single_statement>
     <replace_variables>N</replace_variables>
     <quoteString>N</quoteString>
-    <sql>INSERT INTO kettle_dev.file_update (date_of_execution, date_of_file, verify_for_update, proceed_update) VALUES (CURRENT_DATE(), ?, (select if((DATEDIFF(CURRENT_DATE(), ?) = 0), "Y", "N")), 'Y');</sql>
+    <sql>INSERT INTO update_control (date_of_execution, date_of_file, verify_for_update, proceed_update) VALUES (CURRENT_DATE(), ?, (select if((DATEDIFF(CURRENT_DATE(), ?) >= 0), "Y", "N")), 'Y');</sql>
     <set_params>Y</set_params>
     <insert_field/>
     <update_field/>
@@ -560,10 +570,10 @@
     <read_field/>
     <arguments>
       <argument>
-        <name>date_of_file</name>
+        <name>file_date</name>
       </argument>
       <argument>
-        <name>date_of_file</name>
+        <name>file_date</name>
       </argument>
     </arguments>
     <attributes/>
@@ -575,13 +585,13 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>512</xloc>
+      <xloc>480</xloc>
       <yloc>112</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>Select values</name>
+    <name>Select values 1</name>
     <type>SelectValues</type>
     <description/>
     <distribute>Y</distribute>
@@ -594,11 +604,12 @@
     <fields>
       <field>
         <name>date</name>
+        <rename/>
       </field>
       <select_unspecified>N</select_unspecified>
       <meta>
         <name>date</name>
-        <rename>date_of_file</rename>
+        <rename>file_date</rename>
         <type>Date</type>
         <length>-2</length>
         <precision>-2</precision>
@@ -623,7 +634,7 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>320</xloc>
+      <xloc>192</xloc>
       <yloc>112</yloc>
       <draw>Y</draw>
     </GUI>
@@ -663,7 +674,7 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>864</xloc>
+      <xloc>896</xloc>
       <yloc>112</yloc>
       <draw>Y</draw>
     </GUI>
@@ -680,37 +691,14 @@
       <schema_name/>
     </partitioning>
     <connection>database_dev</connection>
-    <sql>select id_row, if((DATEDIFF('2021-11-16', (select date_of_file from file_update order by id_row desc limit 1)) > 0), "Y", "N") as diff from file_update where proceed_update = '-';</sql>
+    <sql>select id_row, if((DATEDIFF(${FILE_DATE}, (select date_of_file from update_control order by id_row desc limit 1)) > 0), "Y", "N") as diff from update_control where verify_for_update = 'Y' and proceed_update = '-';</sql>
     <limit>0</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
-    <variables_active>N</variables_active>
+    <variables_active>Y</variables_active>
     <lazy_conversion_active>N</lazy_conversion_active>
     <cached_row_meta_active>N</cached_row_meta_active>
     <row-meta>
-      <value-meta>
-        <type>Date</type>
-        <storagetype>normal</storagetype>
-        <name>date_of_file</name>
-        <length>-1</length>
-        <precision>-1</precision>
-        <origin>Select values</origin>
-        <comments/>
-        <conversion_Mask>yyyy-MM-dd</conversion_Mask>
-        <decimal_symbol/>
-        <grouping_symbol/>
-        <currency_symbol/>
-        <trim_type>both</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale/>
-        <date_format_timezone>America/Recife</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
       <value-meta>
         <type>Integer</type>
         <storagetype>normal</storagetype>
@@ -767,7 +755,7 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>704</xloc>
+      <xloc>800</xloc>
       <yloc>112</yloc>
       <draw>Y</draw>
     </GUI>
@@ -887,7 +875,7 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>160</xloc>
+      <xloc>48</xloc>
       <yloc>112</yloc>
       <draw>Y</draw>
     </GUI>
@@ -908,7 +896,7 @@
     <single_statement>N</single_statement>
     <replace_variables>N</replace_variables>
     <quoteString>N</quoteString>
-    <sql>UPDATE file_update SET proceed_update = ? WHERE id_row = ? and proceed_update = '-';</sql>
+    <sql>UPDATE update_control SET proceed_update = ? WHERE id_row = ? and proceed_update = '-';</sql>
     <set_params>Y</set_params>
     <insert_field/>
     <update_field/>
@@ -948,7 +936,7 @@
       <schema_name/>
     </partitioning>
     <connection>database_dev</connection>
-    <sql>SELECT proceed_update FROM file_update order by id_row desc limit 1</sql>
+    <sql>SELECT proceed_update FROM update_control order by id_row desc limit 1</sql>
     <limit>0</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
@@ -1025,6 +1013,29 @@
         <date_format_timezone>America/Recife</date_format_timezone>
         <lenient_string_to_number>N</lenient_string_to_number>
       </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>proceed_update</name>
+        <length>1</length>
+        <precision>-1</precision>
+        <origin>Table input 2</origin>
+        <comments>proceed_update</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Recife</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
     </row-meta>
     <attributes/>
     <cluster_schema/>
@@ -1070,6 +1081,79 @@
     </remotesteps>
     <GUI>
       <xloc>1360</xloc>
+      <yloc>112</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Set variables 3</name>
+    <type>SetVariable</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <fields>
+      <field>
+        <field_name>file_date</field_name>
+        <variable_name>FILE_DATE</variable_name>
+        <variable_type>JVM</variable_type>
+        <default_value/>
+      </field>
+    </fields>
+    <use_formatting>Y</use_formatting>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>320</xloc>
+      <yloc>112</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Get variables</name>
+    <type>GetVariable</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <fields>
+      <field>
+        <name>FILE_DATE</name>
+        <variable>${FILE_DATE}</variable>
+        <type>None</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+      </field>
+    </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>656</xloc>
       <yloc>112</yloc>
       <draw>Y</draw>
     </GUI>
